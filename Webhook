@@ -1,70 +1,144 @@
-local Combinations = {
-	{ancient = 2, fortune = 1},
-	{ancient = 1, fortune = 1, insight = 1},
-	{fortune = 1, insight = 2},
-    {insight = 2, sharpness = 1},
-    {insight = 1, sharpness = 1, looting = 1},
-	{insight = 3},
-	{looting = 3},
-	{opulence = 3},
-	{opulence = 2, sharpness = 1},
-	{opulence = 2, protection = 1},
-	{opulence = 2, haste = 1},
-	{opulence = 2, looting = 1},
-	{opulence = 2, resistance = 1},
-	{knockback = 3},
-	{thorns = 3},
-}
+-- Sword Factory Auto Farm + Webhook (Fixed Version)
 
----------------------------- DO NOT TOUCH ANYTHING PAST THIS IF YOU DONT KNOW WHAT YOU ARE DOING ----------------------------
-
-local maxdistance = 30
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
-local paper = require(ReplicatedStorage.Paper)
+local Workspace = game:GetService("Workspace")
+
 local localPlayer = Players.LocalPlayer
 local username = localPlayer.Name
-local character = workspace:FindFirstChild(username)
-local bases = workspace:WaitForChild("Bases")
-local base = bases:WaitForChild(username)
-local sells = base:WaitForChild("SellStation")
-local sellsmain = sells:WaitForChild("Main")
 
--- ================== WEBHOOK SETTING ==================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/https://discord.com/api/webhooks/1109588717808660540/kmiewkGOszmr_xB025encjBz2Q2zCFWnVbmnTRVO86JttwQL140I7sqSxaFrvOPJL2Cx"  -- GANTI DENGAN WEBHOOK LO!
+-- Tunggu game loaded
+repeat task.wait() until ReplicatedStorage:FindFirstChild("Paper")
 
-local SendCooldown = 10
-local LastSent = 0
--- ====================================================
+local paper = require(ReplicatedStorage.Paper)
 
--- AUTO TEST WEBHOOK SAAT EXECUTE
-local function TestWebhook()
+-- ================== WEBHOOK ==================
+local WEBHOOK_URL = "https://discord.com/api/webhooks/PASTE_WEBHOOK_LO_SINI"  -- GANTI INI!
+
+local function SendWebhook(combo)
+    local comboText = ""
+    for k, v in pairs(combo) do
+        comboText = comboText .. k:upper() .. " x" .. v .. "  "
+    end
+    
     local data = {
-        ["content"] = "**✅ WEBHOOK TEST BERHASIL!**",
+        ["content"] = "@everyone **🎯 COMBO BAGUS DITEMUKAN!**",
         ["embeds"] = {{
             ["title"] = "Sword Factory Sniper",
-            ["description"] = "Script berhasil dijalankan.\nWebhook berfungsi dengan baik.",
+            ["description"] = "**Combo:** " .. comboText .. "\n**Player:** " .. username,
             ["color"] = 0x00ff00,
-            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }}
     }
     pcall(function()
         HttpService:PostAsync(WEBHOOK_URL, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
-        print("✅ Webhook Test Terkirim!")
+        print("Webhook terkirim!")
     end)
 end
 
--- Kirim test saat pertama execute
+-- Auto Test Webhook
 task.spawn(function()
-    wait(2)  -- tunggu sebentar biar aman
-    TestWebhook()
+    task.wait(3)
+    pcall(function()
+        HttpService:PostAsync(WEBHOOK_URL, HttpService:JSONEncode({content = "**✅ WEBHOOK TEST BERHASIL!** Script running..."}), Enum.HttpContentType.ApplicationJson)
+        print("Webhook Test Terkirim!")
+    end)
 end)
 
+-- ================== COMBINATIONS ==================
+local Combinations = {
+	{opulence = 3},
+	{opulence = 2, sharpness = 1},
+	{ancient = 2, fortune = 1},
+	{insight = 3},
+	{fortune = 2},
+	{looting = 3},
+}
+
+local maxdistance = 30
+local enabled = false
+
+-- GUI
 local gui = Instance.new("ScreenGui", localPlayer.PlayerGui)
 local button = Instance.new("TextButton", gui)
-button.Size = UDim2.new(0.1, 0, 0.05, 0)
-button.Position = UDim2.new(.5, 0, 1, 0)
+button.Size = UDim2.new(0.12, 0, 0.06, 0)
+button.Position = UDim2.new(0.5, 0, 0.92, 0)
+button.AnchorPoint = Vector2.new(0.5,1)
+button.Text = "Start Farm"
+button.BackgroundColor3 = Color3.new(0, 1, 0)
+button.TextScaled = true
+
+button.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	button.Text = enabled and "Stop Farm" or "Start Farm"
+	button.BackgroundColor3 = enabled and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+end)
+
+-- Main Logic
+workspace.Swords.ChildAdded:Connect(function(sword)
+	if not enabled then return end
+	
+	task.wait(0.5)
+	local main = sword:FindFirstChild("Main")
+	if not main then return end
+	
+	local gui = main:FindFirstChild("Gui")
+	if not gui then return end
+	
+	local ItemInfo = gui:FindFirstChild("ItemInfo")
+	if not ItemInfo then return end
+	
+	local swordowner = ItemInfo:FindFirstChild("Username")
+	if not swordowner or swordowner.Text \~= username then return end
+
+	local selling = ItemInfo:FindFirstChild("Selling")
+	if not selling then return end
+	
+	local distance = (base.SellStation.Main.Position - main.Position).Magnitude
+	if distance > maxdistance then return end
+
+	-- Enchant Check
+	local enchantsfolder = ItemInfo:FindFirstChild("Enchants")
+	if not enchantsfolder then return end
+
+	local e1 = enchantsfolder:FindFirstChild("Enchant1")
+	local e2 = enchantsfolder:FindFirstChild("Enchant2")
+	local e3 = enchantsfolder:FindFirstChild("Enchant3")
+
+	if not e1 or not e2 or not e3 then return end
+
+	local e1t = string.lower(e1.Text):match("^(%S+)")
+	local e2t = string.lower(e2.Text):match("^(%S+)")
+	local e3t = string.lower(e3.Text):match("^(%S+)")
+
+	local allenchants = {}
+	allenchants[e1t] = 1
+	if allenchants[e2t] then allenchants[e2t] += 1 else allenchants[e2t] = 1 end
+	if allenchants[e3t] then allenchants[e3t] += 1 else allenchants[e3t] = 1 end
+
+	for _, combo in Combinations do
+		local match = true
+		for enchant, amount in combo do
+			if allenchants[enchant] \~= amount then
+				match = false
+				break
+			end
+		end
+		if match then
+			print("🎯 Combo Ditemukan!")
+			SendWebhook(combo)
+			
+			-- Teleport ke sword
+			localPlayer.Character:MoveTo(main.Position + Vector3.new(0,6,0))
+			task.wait(1)
+			paper.Network.InvokeServer("Teleport In Base", "Sell")
+			break
+		end
+	end
+end)
+
+print("✅ Script Auto Farm + Webhook sudah di-fix!")
+print("Klik tombol untuk Start/Stop")button.Position = UDim2.new(.5, 0, 1, 0)
 button.AnchorPoint = Vector2.new(.5,1)
 button.Text = "Start"
 button.BackgroundColor3 = Color3.new(0, 1, 0)
