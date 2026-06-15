@@ -14,7 +14,7 @@ repeat task.wait() until ReplicatedStorage:FindFirstChild("Paper")
 local paper = require(ReplicatedStorage.Paper)
 
 -- ================== WEBHOOK ==================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/PASTE_WEBHOOK_LO_SINI"  -- GANTI INI!
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1109588717808660540/kmiewkGOszmr_xB025encjBz2Q2zCFWnVbmnTRVO86JttwQL140I7sqSxaFrvOPJL2Cx"  -- GANTI INI!
 
 local function SendWebhook(combo)
     local comboText = ""
