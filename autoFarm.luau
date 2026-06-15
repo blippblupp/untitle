@@ -8,6 +8,10 @@ local Combinations = {
 	{looting = 3},
 	{opulence = 3},
 	{opulence = 2, sharpness = 1},
+	{opulence = 2, protection = 1},
+	{opulence = 2, haste = 1},
+	{opulence = 2, looting = 1},
+	{opulence = 2, resistance = 1},
 	{knockback = 3},
 	{thorns = 3},
 }
