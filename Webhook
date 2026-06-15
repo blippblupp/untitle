@@ -32,7 +32,7 @@ local sells = base:WaitForChild("SellStation")
 local sellsmain = sells:WaitForChild("Main")
 
 -- ================== WEBHOOK SETTING ==================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/PASTE_WEBHOOK_LO_SINI"  -- GANTI DENGAN WEBHOOK LO!
+local WEBHOOK_URL = "https://discord.com/api/webhooks/https://discord.com/api/webhooks/1109588717808660540/kmiewkGOszmr_xB025encjBz2Q2zCFWnVbmnTRVO86JttwQL140I7sqSxaFrvOPJL2Cx"  -- GANTI DENGAN WEBHOOK LO!
 
 local SendCooldown = 10
 local LastSent = 0
@@ -99,7 +99,7 @@ local function SendWebhook(combo)
 	end
 	
 	local data = {
-		["content"] = "@everyone **🎯 COMBO BAGUS DITEMUKAN!**",
+		["content"] = "@erisyy **🎯 COMBO BAGUS DITEMUKAN!**",
 		["embeds"] = {{
 			["title"] = "Sword Factory - Combo Detected",
 			["description"] = "**Combo:** " .. comboText .. "\n**Player:** " .. username .. "\n**Time:** " .. os.date("%H:%M:%S"),
