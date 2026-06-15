@@ -1,4 +1,4 @@
--- Sword Factory Auto Farm + Webhook (Fixed Version)
+-- Sword Factory Auto Farm + Webhook (Super Stable Version)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -8,10 +8,11 @@ local Workspace = game:GetService("Workspace")
 local localPlayer = Players.LocalPlayer
 local username = localPlayer.Name
 
--- Tunggu game loaded
-repeat task.wait() until ReplicatedStorage:FindFirstChild("Paper")
-
+-- Tunggu sampai game fully loaded
+print("Menunggu game load...")
+repeat task.wait(1) until ReplicatedStorage:FindFirstChild("Paper")
 local paper = require(ReplicatedStorage.Paper)
+print("✅ Paper module loaded!")
 
 -- ================== WEBHOOK ==================
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1109588717808660540/kmiewkGOszmr_xB025encjBz2Q2zCFWnVbmnTRVO86JttwQL140I7sqSxaFrvOPJL2Cx"  -- GANTI INI!
@@ -38,10 +39,10 @@ end
 
 -- Auto Test Webhook
 task.spawn(function()
-    task.wait(3)
+    task.wait(4)
     pcall(function()
-        HttpService:PostAsync(WEBHOOK_URL, HttpService:JSONEncode({content = "**✅ WEBHOOK TEST BERHASIL!** Script running..."}), Enum.HttpContentType.ApplicationJson)
-        print("Webhook Test Terkirim!")
+        HttpService:PostAsync(WEBHOOK_URL, HttpService:JSONEncode({content = "**✅ WEBHOOK TEST BERHASIL!** Script Auto Farm + Sniper berjalan."}), Enum.HttpContentType.ApplicationJson)
+        print("✅ Webhook Test Terkirim!")
     end)
 end)
 
@@ -58,17 +59,77 @@ local Combinations = {
 local maxdistance = 30
 local enabled = false
 
--- GUI
+-- GUI Button
 local gui = Instance.new("ScreenGui", localPlayer.PlayerGui)
 local button = Instance.new("TextButton", gui)
-button.Size = UDim2.new(0.12, 0, 0.06, 0)
-button.Position = UDim2.new(0.5, 0, 0.92, 0)
+button.Size = UDim2.new(0.15, 0, 0.07, 0)
+button.Position = UDim2.new(0.5, 0, 0.9, 0)
 button.AnchorPoint = Vector2.new(0.5,1)
 button.Text = "Start Farm"
 button.BackgroundColor3 = Color3.new(0, 1, 0)
 button.TextScaled = true
+button.TextColor3 = Color3.new(0,0,0)
 
 button.MouseButton1Click:Connect(function()
+	enabled = not enabled
+	button.Text = enabled and "STOP FARM" or "START FARM"
+	button.BackgroundColor3 = enabled and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
+end)
+
+print("✅ Script siap! Klik tombol Start Farm")
+
+-- Main Sniper + Auto Farm
+workspace.Swords.ChildAdded:Connect(function(sword)
+	if not enabled then return end
+	task.wait(0.6)
+	
+	local main = sword:FindFirstChild("Main")
+	if not main then return end
+	
+	local ItemInfo = main:FindFirstChild("Gui") and main.Gui:FindFirstChild("ItemInfo")
+	if not ItemInfo then return end
+	
+	if ItemInfo:FindFirstChild("Username") and ItemInfo.Username.Text \~= username then return end
+
+	local distance = (base and base.SellStation and base.SellStation.Main.Position - main.Position).Magnitude or 999
+	if distance > maxdistance then return end
+
+	local enchantsfolder = ItemInfo:FindFirstChild("Enchants")
+	if not enchantsfolder then return end
+
+	local e1 = enchantsfolder:FindFirstChild("Enchant1")
+	local e2 = enchantsfolder:FindFirstChild("Enchant2")
+	local e3 = enchantsfolder:FindFirstChild("Enchant3")
+	if not (e1 and e2 and e3) then return end
+
+	local e1t = string.lower(e1.Text):match("^(%S+)")
+	local e2t = string.lower(e2.Text):match("^(%S+)")
+	local e3t = string.lower(e3.Text):match("^(%S+)")
+
+	local allenchants = {}
+	allenchants[e1t] = 1
+	if allenchants[e2t] then allenchants[e2t] += 1 else allenchants[e2t] = 1 end
+	if allenchants[e3t] then allenchants[e3t] += 1 else allenchants[e3t] = 1 end
+
+	for _, combo in Combinations do
+		local match = true
+		for enchant, amount in pairs(combo) do
+			if (allenchants[enchant] or 0) \~= amount then
+				match = false
+				break
+			end
+		end
+		if match then
+			print("🎯 COMBO DITEMUKAN!")
+			SendWebhook(combo)
+			
+			localPlayer.Character:MoveTo(main.Position + Vector3.new(0,8,0))
+			task.wait(1)
+			paper.Network.InvokeServer("Teleport In Base", "Sell")
+			break
+		end
+	end
+end)button.MouseButton1Click:Connect(function()
 	enabled = not enabled
 	button.Text = enabled and "Stop Farm" or "Start Farm"
 	button.BackgroundColor3 = enabled and Color3.new(1, 0, 0) or Color3.new(0, 1, 0)
