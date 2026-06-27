@@ -1,6 +1,6 @@
 local Combinations = {
 	{ancient = 2, fortune = 1},
---	{ancient = 1, fortune = 2},
+	{ancient = 1, fortune = 2},
 	{ancient = 1, fortune = 1, insight = 1},
 	{fortune = 1, insight = 2},
     {insight = 2, sharpness = 1},
