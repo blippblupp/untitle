@@ -45,7 +45,7 @@ local function sendWebhook(enchants, comboDescription)
 				color = 0x00FF7F, -- Hijau
 				fields = fields,
 				footer = {
-					text = "EnchantSnipe• " .. game:GetService("Players").LocalPlayer.Name
+					text = "Enchant Snipe • " .. game:GetService("Players").LocalPlayer.Name
 				},
 				timestamp = DateTime.now():ToIsoDate()
 			}
