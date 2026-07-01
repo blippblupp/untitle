@@ -8,7 +8,7 @@ local Combinations = {
     {insight = 1, looting = 2}, 
 --  {insight = 1, sharpness = 1, looting = 1},
 	{insight = 3},
-	{looting = 3},
+--	{looting = 3},
 	{opulence = 3},
 	{opulence = 2, sharpness = 1},
 	{opulence = 2, protection = 1},
